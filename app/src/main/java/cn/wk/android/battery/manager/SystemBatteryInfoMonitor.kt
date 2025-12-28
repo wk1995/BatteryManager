@@ -63,10 +63,10 @@ object SystemBatteryInfoMonitor {
                         val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
                         val chargeType = when (plugged) {
                             //数据口供电
-                            BatteryManager.BATTERY_PLUGGED_USB -> ChargeType.UN_KNOW
+                            BatteryManager.BATTERY_PLUGGED_USB -> ChargeType.USB
                             //充电器供电
-                            BatteryManager.BATTERY_PLUGGED_AC -> ChargeType.UN_KNOW
-                            BatteryManager.BATTERY_PLUGGED_WIRELESS -> ChargeType.UN_KNOW
+                            BatteryManager.BATTERY_PLUGGED_AC -> ChargeType.AC
+                            BatteryManager.BATTERY_PLUGGED_WIRELESS -> ChargeType.WIRELESS
                             //.设备通过“底座（Dock）”方式供电或充电。
                             BatteryManager.BATTERY_PLUGGED_DOCK -> ChargeType.UN_KNOW
                             else -> ChargeType.UN_KNOW
