@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import androidx.core.content.ContextCompat
+import android.util.Log
 import cn.wk.android.battery.manager.charge.ChargeType
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -20,7 +20,7 @@ object SystemBatteryInfoMonitor {
     }
     private var batteryReceiver: BroadcastReceiver? = null
 
-    private val _systemBatteryRawData = MutableSharedFlow<SystemBatteryRawData>()
+    private val _systemBatteryRawData = MutableSharedFlow<SystemBatteryRawData>(replay = 1)
     val systemBatteryRawData = _systemBatteryRawData.asSharedFlow()
 
     private fun initReceiver(initSuccess: () -> Unit) {
@@ -29,6 +29,7 @@ object SystemBatteryInfoMonitor {
         }
         batteryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
+                Log.d("wkkkkkk", "onReceive action: ${intent.action}")
                 when (intent.action) {
                     Intent.ACTION_BATTERY_CHANGED -> {
                         //当前电量刻度（不是百分比）
@@ -71,13 +72,15 @@ object SystemBatteryInfoMonitor {
                             BatteryManager.BATTERY_PLUGGED_DOCK -> ChargeType.UN_KNOW
                             else -> ChargeType.UN_KNOW
                         }
+                        val data = SystemBatteryRawData(
+                            level = level,
+                            batteryScale = scale,
+                            systemBatteryStatus = systemBatteryStatue,
+                            plugged = chargeType
+                        )
+                        Log.d("wkkkkkk", "data：$data")
                         _systemBatteryRawData.tryEmit(
-                            SystemBatteryRawData(
-                                level = level,
-                                batteryScale = scale,
-                                systemBatteryStatus = systemBatteryStatue,
-                                plugged = chargeType
-                            )
+                            data
                         )
                     }
 
@@ -107,9 +110,10 @@ object SystemBatteryInfoMonitor {
     }
 
     fun startMonitor(context: Context) {
+        Log.d("wkkkkkk", "startMonitor")
         initReceiver {
-            ContextCompat.registerReceiver(
-                context, batteryReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED
+            context.registerReceiver(
+                batteryReceiver, filter
             )
         }
     }
