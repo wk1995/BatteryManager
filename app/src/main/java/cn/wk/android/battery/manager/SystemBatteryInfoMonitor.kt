@@ -36,7 +36,20 @@ object SystemBatteryInfoMonitor {
                         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                         //电量刻度的最大值
                         val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-                        val batteryPct = level * 100 / scale.toFloat()
+                        val health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH, -1)
+                        val batteryHealthType = when (health) {
+                            BatteryManager.BATTERY_HEALTH_GOOD -> BatteryHealthType.GOOD
+                            BatteryManager.BATTERY_HEALTH_OVERHEAT -> BatteryHealthType.OVERHEAT
+                            BatteryManager.BATTERY_HEALTH_DEAD -> BatteryHealthType.DEAD
+                            BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE -> BatteryHealthType.OVER_VOLTAGE
+                            BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE -> BatteryHealthType.UNSPECIFIED_FAILURE
+                            else -> BatteryHealthType.UNKNOWN
+                        }
+
+                        val temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1)
+                        val voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1)
+                        val technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: ""
+
                         //当前电池状态（不是充电类型） status 描述的是 电池当前是否在接收能量.插不插电由另一个字段决定BatteryManager.EXTRA_PLUGGED
                         val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
                         val systemBatteryStatue = when (status) {
@@ -75,6 +88,10 @@ object SystemBatteryInfoMonitor {
                         val data = SystemBatteryRawData(
                             level = level,
                             batteryScale = scale,
+                            temperature = temperature,
+                            voltage = voltage,
+                            technology = technology,
+                            batteryHealthType = batteryHealthType,
                             systemBatteryStatus = systemBatteryStatue,
                             plugged = chargeType
                         )
@@ -100,7 +117,7 @@ object SystemBatteryInfoMonitor {
                     }
 
                     Intent.ACTION_BATTERY_OKAY -> {
-                        // 电量恢复
+                        // 电量充足
 
                     }
                 }

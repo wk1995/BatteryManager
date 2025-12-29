@@ -4,17 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cn.wk.android.battery.manager.ui.theme.BatteryManagerTheme
@@ -35,19 +40,21 @@ class MainActivity : ComponentActivity() {
                     val systemBatteryRawData by viewModel.systemBatteryRawData.collectAsStateWithLifecycle(
                         SystemBatteryRawData()
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                    ) {
-                        Column() {
-                            Text(text = "level:${systemBatteryRawData.level}")
-                            Text(text = "batteryScale:${systemBatteryRawData.batteryScale}")
-                            Text(text = "systemBatteryStatus:${systemBatteryRawData.systemBatteryStatus}")
-                            Text(text = "plugged:${systemBatteryRawData.plugged}")
-                        }
 
+                    val current by viewModel.current.collectAsStateWithLifecycle(0)
+                    val voltage by viewModel.voltage.collectAsStateWithLifecycle(0)
+
+                    LaunchedEffect(Unit) {
+                        viewModel.statObtainCurrentRecycle(this@MainActivity)
                     }
+
+                    BatteryInfo(
+                        Modifier,
+                        systemBatteryRawData = systemBatteryRawData,
+                        current = current,
+                        voltage = voltage,
+                        paddingValues = innerPadding
+                    )
                 }
             }
         }
@@ -59,17 +66,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!", modifier = modifier
-    )
+fun BatteryInfo(
+    modifier: Modifier = Modifier,
+    current: Int = 0,
+    voltage: Int = 0,
+    systemBatteryRawData: SystemBatteryRawData = SystemBatteryRawData(),
+    paddingValues: PaddingValues = PaddingValues()
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(text = "level:${systemBatteryRawData.level}")
+            Text(text = "batteryScale:${systemBatteryRawData.batteryScale}")
+            Text(text = "systemBatteryStatus:${systemBatteryRawData.systemBatteryStatus}")
+            Text(text = "voltage:${systemBatteryRawData.voltage}")
+            Text(text = "temperature:${systemBatteryRawData.temperature}")
+            Text(text = "batteryHealthType:${systemBatteryRawData.batteryHealthType}")
+            Text(text = "technology:${systemBatteryRawData.technology}")
+            Text(text = "plugged:${systemBatteryRawData.plugged}")
+            Column(
+                modifier = Modifier
+                    .weight(1.0f)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "current : $current")
+                Text(text = "voltage : $voltage")
+                Text(text = "power : ${current * voltage}")
+            }
+        }
+
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     BatteryManagerTheme {
-        Greeting("Android")
+        BatteryInfo()
     }
 }
