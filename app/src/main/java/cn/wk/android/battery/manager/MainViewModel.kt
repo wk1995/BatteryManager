@@ -19,15 +19,23 @@ class MainViewModel : ViewModel() {
 
     private val _current = MutableSharedFlow<Int>()
     val current = _current.asSharedFlow()
-    private val _voltage = MutableSharedFlow<Int>()
+    private val _voltage = MutableSharedFlow<Float>()
     val voltage = _voltage.asSharedFlow()
 
 
     fun statObtainCurrentRecycle(context: Context) {
         viewModelScope.launch {
             if (flag) {
-                _current.emit(ChargeManager.getCurrentChargeCurrent(context))
-                _voltage.emit(ChargeManager.getCurrentChargeVoltage(context))
+                val current = ChargeManager.getCurrentChargeCurrent(context)
+                _current.emit(current)
+                val voltage = ChargeManager.getCurrentChargeVoltage(context).let {
+                    if (it > 1000) {
+                        it.toFloat() / 1000
+                    } else {
+                        it.toFloat()
+                    }
+                }
+                _voltage.emit(voltage)
                 delay(2000)
                 if (isActive) {
                     statObtainCurrentRecycle(context = context)

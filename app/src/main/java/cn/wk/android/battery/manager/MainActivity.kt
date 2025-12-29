@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     )
 
                     val current by viewModel.current.collectAsStateWithLifecycle(0)
-                    val voltage by viewModel.voltage.collectAsStateWithLifecycle(0)
+                    val voltage by viewModel.voltage.collectAsStateWithLifecycle(0f)
 
                     LaunchedEffect(Unit) {
                         viewModel.statObtainCurrentRecycle(this@MainActivity)
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 fun BatteryInfo(
     modifier: Modifier = Modifier,
     current: Int = 0,
-    voltage: Int = 0,
+    voltage: Float = 0f,
     systemBatteryRawData: SystemBatteryRawData = SystemBatteryRawData(),
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -101,8 +101,8 @@ fun BatteryInfo(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(text = "current : $current")
-                Text(text = "voltage : $voltage")
-                Text(text = "power : ${current * voltage}")
+                Text(text = "voltage : ${voltage}V")
+                Text(text = "power : ${current * voltage}W")
             }
         }
 
